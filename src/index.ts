@@ -12,7 +12,7 @@ type StyleObject = {
   [selectorKey: string]: StyleObjectValues;
 };
 
-type StringMap = {
+export type StringMap = {
   [selectorKey: string]: string;
 };
 
