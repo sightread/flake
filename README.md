@@ -9,23 +9,25 @@ is to be as small as possible while supporting all of the important use cases.
 - pseudo-classes/pseudo-selectors
 - your favorite css properties
 - SSR
+- no dependencies
+- written in typescript
 
 ## Installation
 
 ```shell
-$ npm i @sightread/flakecss
+$ npm i @sightread/flake
 or
-$ yarn add @sightread/flakecss
+$ yarn add @sightread/flake
 ```
 
 ## Usage
 
 flakecss will bundle and insert all calls into a single target element.
 
-##### In your desired target component
+### In the root of your app
 
 ```javascript
-import { extractCss, FLAKE_STYLE_ID } from '@sightread/flakecss'
+import { extractCss, FLAKE_STYLE_ID } from "@sightread/flake";
 
 function RootComponent() {
   // ... some react stuff
@@ -34,53 +36,125 @@ function RootComponent() {
     <html>
       <head>
         ...
-        <style id={FLAKE_STYLE_ID} dangerouslySetInnerHTML={{ __html: extractCss() }} />
+        <style
+          id={FLAKE_STYLE_ID}
+          dangerouslySetInnerHTML={{ __html: extractCss() }}
+        />
       </head>
       ...
     </html>
-  )
+  );
 }
 ```
 
+### In your components
+
+Note: `css` should be called **outside** of the component on the module level.
+
 ```javascript
-import { css, mediaQuery } from 'flakecss'
+import { css, mediaQuery } from "@sightread/flake";
 
 const classes = css({
-  leftSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    boxSizing: 'border-box',
-    paddingBottom: '72px',
-    [mediaQuery.up(901)]: {
-      width: '50%',
-    },
-    [mediaQuery.down(900)]: {
-      width: '100%',
-      padding: '0px 15px',
-    },
-    '& p': {
+  headerItem: {
+    color: "blue",
+    fontSize: "24px",
+  },
+  headerSecondary: {
+    color: "red",
+    fontSize: "16px",
+  },
+});
+
+function MyComponent() {
+  // ... react stuff
+
+  return (
+    <div>
+      <h1 className={classes.headerItem}>It works!</h1>
+      <h2 className={classes.headerSecondary}>(hopefully)</h2>
+    </div>
+  );
+}
+```
+
+### Peudoclasses
+
+```javascript
+const classes = css({
+    navLink: {
+      color: "blue",
+      "&:hover": {
+        color: "black",
+        textDecoration: "underline"
+      },
+      "&:focus": {
+        color: "black"
+      }
+    }
+
+  },
+})
+```
+
+### Selectors
+
+```javascript
+
+const classes = css({
+  container: {
+    '& p:nth-child(odd)': {
       fontSize: 18,
       color: 'lightgrey',
       transition: '300ms',
     },
-    '&:hover': {
-      backgroundColor: 'white',
-  },
+  }
 })
+...
+...
+<div className={classes.container}>
+  <p>paragraph one</p>
+  <p>paragraph two</p>
+  <p>paragraph three</p>
+  <p>paragraph four</p>
+</div>
+```
 
-function MyComponent() {
-    // ... react stuff
+### Media Queries
 
-    return (
-        <div>
-            <div className={classes.leftSection}>
-            {/* more jsx*/}
-            </div>
-        </div>
-    )
+We provide a small api for media queries for classes. The following example is equivalent to:
+
+```css
+@media only screen and (min-width: 900px) {
+  .container {
+    width: 50%;
+  }
+}
+@media only screen and (max-width: 900px) {
+  .container {
+    width: 100%;
+  }
 }
 ```
+
+```javascript
+import { mediaQuery } from "@sightread/flake"
+
+const classes = css({
+  container {
+    [mediaQuery.up(900)]: {
+      width: "50%"
+    },
+    [mediaQuery.down(900)]: {
+      width: "100%"
+    }
+  }
+})
+
+```
+
+## Limitations
+
+Currently, the css is compiled each time an app is hot reloaded. This will cause the target `style` tag to grow as the app is being developed. This is not an issues for production.
 
 ## License
 
