@@ -170,7 +170,8 @@ const mediaQuery = {
     `@media only screen and (min-width: ${min}px) and (max-width: ${max}px)`,
 };
 
-function objstr(arg: string | { [key: string]: boolean }): string {
+type ObjStringable = string | { [key: string]: boolean };
+function objstr(arg: ObjStringable): string {
   if (typeof arg === "string") return arg;
 
   return Object.keys(arg)
@@ -179,7 +180,7 @@ function objstr(arg: string | { [key: string]: boolean }): string {
     .join(" ");
 }
 
-function classNames(...args: string[]): string {
+function classNames(...args: ObjStringable[]): string {
   return args.map(objstr).join(" ");
 }
 
