@@ -137,19 +137,67 @@ We provide a small api for media queries for classes. The following example is e
 ```
 
 ```javascript
-import { mediaQuery } from "@sightread/flake"
+import { mediaQuery } from "@sightread/flake";
 
 const classes = css({
-  container {
+  container: {
     [mediaQuery.up(900)]: {
-      width: "50%"
+      width: "50%",
     },
     [mediaQuery.down(900)]: {
-      width: "100%"
-    }
-  }
-})
+      width: "100%",
+    },
+  },
+});
+```
 
+### Combining multiple classes
+
+Often you may want to use multiple defined classes for one element, or conditionally use classes.
+For either of these, use our `classNames` function.
+
+`classNames` takes a variable number of arguments of either type string or object.
+If the argument is a string, it will be concatonated the the return string.
+If the parameter is an object, the associated keys of truthy values will be added.
+
+In the example bellow, the button will have the classes associated with `button` and
+`btnPrimary` while `error` is `false`, else `button` and `btnDisabled`.
+
+```javascript
+import { classNames } from "@sightread/flake";
+
+const classes = css({
+  button: {
+    padding: "5px 10px",
+    fontSize: "16px",
+    color: "white",
+  },
+  btnPrimary: {
+    backgroundColor: "blue",
+  },
+  btnDisabled: {
+    backgroundColor: "red",
+  },
+});
+
+function MyComponent() {
+  const [error, setError] = useState(false);
+  // .. react stuff..
+
+  return (
+    <div>
+      ...
+      <button
+        className={classNames(classes.button, {
+          [classes.btnPrimary]: !error,
+          [classes.btnDisabled]: error,
+        })}
+      >
+        Submit
+      </button>
+    </div>
+  );
+}
 ```
 
 ## Limitations

@@ -12,7 +12,7 @@ type StyleObject = {
   [selectorKey: string]: StyleObjectValues;
 };
 
-export type StringMap = {
+type StringMap = {
   [selectorKey: string]: string;
 };
 
@@ -22,7 +22,6 @@ let globalStyle = "";
 // TODO: create babel plugin that processes all of the CSS into a single bundle
 // and removes all css() calls from the source in favor of inlining classname map
 // that would enable complete removal of flake from client.
-const DETERMINISTIC_CLASSNAMES = false;
 
 /**
  * style object expected in the shape of
@@ -63,10 +62,9 @@ function compileCss(
   const classes: StringMap = {};
   let styleHtml = "";
 
-  Object.entries(styleObj).forEach(([selector, styles]) => {
-    const suffix = DETERMINISTIC_CLASSNAMES
-      ? getDeterministicClassnameSuffix(styles)
-      : counter++;
+  Object.keys(styleObj).forEach((selector) => {
+    const styles = styleObj[selector];
+    const suffix = counter++;
     const className = `${selector}-${suffix}`;
     counter++;
 
@@ -90,18 +88,15 @@ function compileCss(
   return { classes, styleHtml };
 }
 
-function getDeterministicClassnameSuffix(obj: StyleObjectValues) {
-  return hash(JSON.stringify(obj));
-}
-
 function getDirectProperties(styleObject: StyleObjectValues): CSSProperties {
   const extractedProps: StringMap = {};
-  for (const [propKey, propVal] of Object.entries(styleObject)) {
+  Object.keys(styleObject).forEach((propKey) => {
+    const propVal = (styleObject as any)[propKey];
     if (typeof propVal === "object") {
-      continue;
+      return;
     }
     extractedProps[propKey] = propVal;
-  }
+  });
   return extractedProps as CSSProperties;
 }
 
@@ -109,19 +104,22 @@ function getNestedSelectors(
   styleObject: StyleObjectValues,
   className: string
 ): string {
-  return Object.entries(styleObject).reduce((acc, [key, styles]) => {
+  let acc = "";
+  Object.keys(styleObject).forEach((key: string) => {
+    const styles = (styleObject as any)[key];
     if (isNestedSelector(key)) {
       acc += `.${className}${key.slice(1)}{${rules(styles)}}`;
     } else if (isMediaQuery(key)) {
       acc += `${key}{.${className} {${rules(styles)}}}`;
     }
-    return acc;
-  }, "");
+  });
+  return acc;
 }
 
 function rules(rules: CSSProperties): string {
-  return Object.entries(rules)
-    .map(([prop, val]) => {
+  return Object.keys(rules)
+    .map((prop) => {
+      let val = (rules as any)[prop];
       val = maybeAddPx(prop, val);
       return dashCase(prop) + ":" + val + ";";
     })
@@ -149,12 +147,12 @@ function dashCase(str: string): string {
 }
 
 const FLAKE_STYLE_ID = "FLAKE_CSS";
-let styleEl: null | HTMLStyleElement =
-  (isBrowser() &&
-    (document.getElementById(FLAKE_STYLE_ID) as HTMLStyleElement)) ||
-  null;
-
+let styleEl: null | HTMLStyleElement;
 function getStyleEl(): HTMLStyleElement {
+  if (styleEl) {
+    return styleEl;
+  }
+  styleEl = document.getElementById(FLAKE_STYLE_ID) as HTMLStyleElement;
   if (styleEl) {
     return styleEl;
   }
@@ -165,21 +163,6 @@ function getStyleEl(): HTMLStyleElement {
   return styleEl;
 }
 
-// Stolen from stackoverflow: https://stackoverflow.com/questions/6122571/simple-non-secure-hash-function-for-javascript
-function hash(str: string) {
-  if (str.length == 0) {
-    return 0;
-  }
-
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return hash;
-}
-
 const mediaQuery = {
   up: (bp: number): string => `@media only screen and (min-width: ${bp}px)`,
   down: (bp: number): string => `@media only screen and (max-width: ${bp}px)`,
@@ -187,25 +170,18 @@ const mediaQuery = {
     `@media only screen and (min-width: ${min}px) and (max-width: ${max}px)`,
 };
 
-type argType = string | { [key: string]: boolean };
-type cArgs = argType[];
-function use(arg: argType): string {
-  if (typeof arg === "string") {
-    return arg;
-  }
-  return Object.entries(arg)
-    .map(([k, v]) => (v ? k : ""))
+type ObjStringable = string | { [key: string]: boolean };
+function objstr(arg: ObjStringable): string {
+  if (typeof arg === "string") return arg;
+
+  return Object.keys(arg)
+    .map((k) => arg[k] && k)
+    .filter(Boolean)
     .join(" ");
 }
-function cNames(...args: cArgs): string {
-  return args.reduce<string>((a, x) => `${a} ${use(x)}`, "");
+
+function classNames(...args: ObjStringable[]): string {
+  return args.map(objstr).join(" ");
 }
 
-module.exports = {
-  css,
-  extractCss,
-  compileCss,
-  FLAKE_STYLE_ID,
-  cNames,
-  mediaQuery,
-};
+export { css, extractCss, compileCss, FLAKE_STYLE_ID, classNames, mediaQuery };
