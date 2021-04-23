@@ -8,7 +8,7 @@
     "dist/"
   ],
   "scripts": {
-    "build": "tsc && terser dist/index.js -c -m -o dist/index.min.mjs && gzip dist/index.min.js -k -f",
+    "build": "tsc && terser dist/index.js -c -m -o dist/index.min.js && gzip dist/index.min.js -k -f",
     "test": "npm run build && jest"
   },
   "keywords": [
