@@ -1,14 +1,14 @@
 {
   "name": "@sightread/flake",
-  "version": "0.5.5",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "version": "0.5.9",
+  "main": "./dist/index.min.js",
+  "typings": "./dist/index.d.ts",
   "license": "MIT",
   "files": [
     "dist/"
   ],
   "scripts": {
-    "build": "tsc && terser dist/index.js -c -m -o dist/index.min.js && gzip dist/index.min.js -k -f",
+    "build": "tsc && terser dist/index.js -c -m -o dist/index.min.mjs && gzip dist/index.min.js -k -f",
     "test": "npm run build && jest"
   },
   "keywords": [
