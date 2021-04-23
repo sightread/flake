@@ -19,7 +19,7 @@ const classes = css({
     alignItems: "center"
   },
   title: {
-    margin: "0px",
+    margin: 0,
     lineHeight: 1.15,
     fontSize: "4rem",
     textAlign: "center",
@@ -100,11 +100,11 @@ const classes = css({
       color: "#0070f3",
       borderColor: "#0070f3",
     },
-    "& h3": {
+    "& a h3": {
       margin: "0 0 1rem 0",
       fontSize: "1.5rem"
     },
-    "& p": {
+    "& a p": {
       margin: 0,
       fontSize: "1.25rem",
       lineHeight: 1.5   
