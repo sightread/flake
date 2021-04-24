@@ -1,15 +1,22 @@
 {
   "name": "@sightread/flake",
   "version": "0.5.5",
-  "main": "./dist/index.min.js",
+  "repository": "@sightread/flake",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
   "license": "MIT",
   "files": [
     "dist/"
   ],
   "scripts": {
-    "build": "tsc && terser dist/index.js -c -m -o dist/index.min.js && gzip dist/index.min.js -k -f",
-    "test": "npm run build && jest"
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc --module ES6 && mv dist/index.js dist/index.mjs",
+    "build:cjs": "tsc --module CommonJs && mv dist/index.js dist/index.cjs.js",
+    "test": "jest",
+    "size": "esbuild --log-level=silent --minify --format=esm --outfile=dist/index.min.mjs src/index.ts && bundlesize",
+    "ci": "npm test && tsc --noEmit && npm run size",
+    "clean": "rm dist/*"
   },
   "keywords": [
     "css",
@@ -21,27 +28,23 @@
     "url": "https://github.com/sightread/flake/issues"
   },
   "homepage": "https://github.com/sightread/flake",
-  "browserslist": {
-    "production": [
-      ">2%",
-      "not dead"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
+  "bundlesize": [
+    {
+      "path": "./dist/index.min.mjs",
+      "maxSize": "1 kB"
+    }
+  ],
   "devDependencies": {
     "@jest/globals": "^26.6.2",
+    "@types/jest": "^26.0.22",
     "@types/node": "^14.14.39",
     "@types/react": "^17.0.3",
-    "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
-    "eslint": "^7.24.0",
+    "bundlesize": "^0.18.1",
+    "esbuild": "^0.11.13",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
-    "terser": "^5.6.1",
+    "ts-jest": "^26.5.5",
     "typescript": "^4.2.4"
   }
 }

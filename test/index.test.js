@@ -1,5 +1,5 @@
 const { describe, expect, it } = require("@jest/globals");
-const { compileCss, classNames } = require("../dist/index.min.js");
+const { compileCss, classNames } = require("../src");
 
 describe("flake", () => {
   describe("compileCss", () => {

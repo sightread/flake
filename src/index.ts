@@ -134,7 +134,13 @@ function isMediaQuery(key: string): boolean {
   return key.startsWith("@media");
 }
 
-const unitlessProperties = new Set(["opacity", "zIndex", "fontWeight", "lineHeight", "flex"]);
+const unitlessProperties = new Set([
+  "opacity",
+  "zIndex",
+  "fontWeight",
+  "lineHeight",
+  "flex",
+]);
 function maybeAddPx(attr: string, val: number | string) {
   if (typeof val === "string" || unitlessProperties.has(attr)) {
     return val;

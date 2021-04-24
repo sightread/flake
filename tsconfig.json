@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "module": "CommonJS",
     // Generate d.ts files
     "declaration": true,
     "noImplicitAny": true,
