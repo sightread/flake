@@ -1,9 +1,9 @@
 // import esbuild from "esbuild";
 // import * as flake from "../dist/index.mjs";
 // import fs from "fs/promises";
-const esbuild = require('esbuild');
-const flake = require('../dist/index.cjs.js')
-const fs = require('fs/promises');
+const esbuild = require("esbuild");
+const flake = require("../dist/index.cjs.js");
+const fs = require("fs/promises");
 
 /**
  * @param {string} file
@@ -16,24 +16,23 @@ async function getCssFromEntryPoint(file) {
     entryPoints: [file],
     external: ["@sightread/flake", "crypto"],
     loader: { ".js": "jsx" },
-    // plugins: [
-    //   {
-    //     name: "__filename",
-    //     setup(build) {
-    //       build.onLoad({ filter: /\.js$/, namespace: "" }, async (file) => {
-    //         const contents = await fs.readFile(file.path, "utf-8");
-    //         if (contents.includes('__filename') || file.path.includes('pages/')) {
-    //           console.log(contents.replace(/__filename/g, file.path))
-
-    //         }
-    //         return {
-    //           contents: contents.replace(/__filename/g, file.path),
-    //           loader: "jsx",
-    //         };
-    //       });
-    //     },
-    //   },
-    // ],
+    sourcemap: "inline",
+    sourcesContent: true,
+    plugins: [
+      {
+        name: "__filename",
+        setup(build) {
+          build.onLoad({ filter: /\.js$/, namespace: "" }, async (file) => {
+            const contents = await fs.readFile(file.path, "utf-8");
+            console.log(file.path);
+            return {
+              contents: contents.replace(/css\(/g, `css("${file.path}",`),
+              loader: "jsx",
+            };
+          });
+        },
+      },
+    ],
     watch: {
       onRebuild(fail, result) {
         console.log("Rebuild took");
@@ -52,7 +51,7 @@ function getCss(result) {
   );
   eval(output);
   console.log(`Eval took: ${Date.now() - evalStart}`);
-  console.log(flake.getGlobalStyles());
+  console.log(JSON.stringify(flake.getGlobalStyles()));
 }
 
 /* TODO:

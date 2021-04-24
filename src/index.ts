@@ -20,10 +20,6 @@ let counter = 0;
 let globalStyle = "";
 let globalClasses: any = {};
 
-// TODO: create babel plugin that processes all of the CSS into a single bundle
-// and removes all css() calls from the source in favor of inlining classname map
-// that would enable complete removal of flake from client.
-
 /**
  * style object expected in the shape of
  * {
@@ -43,13 +39,21 @@ let globalClasses: any = {};
  * }
  */
 function css(styleObject: StyleObject): StringMap {
+  let filename;
+
+  // TODO: better support for filename extraction. No clue how.
+  if (!isBrowser()) {
+    if (arguments.length == 2) {
+      filename = arguments[0];
+      styleObject = arguments[1];
+    }
+  }
+
   const parsed = compileCss(styleObject);
   if (!isBrowser()) {
     globalStyle += parsed.styleHtml;
-    Object.assign(globalClasses, parsed.classes);
-    // TODO: support filename
-    // globalClasses[__filename] ??= [];
-    // globalClasses[__filename].push(parsed.classes);
+    globalClasses[filename] ??= [];
+    globalClasses[filename].push(parsed.classes);
   } else {
     getStyleEl().innerHTML += parsed.styleHtml;
   }
@@ -70,13 +74,6 @@ function compileCss(
   Object.keys(styleObj).forEach((selector) => {
     const styles = styleObj[selector];
     let suffix: number | string = counter++;
-    if (!isBrowser()) {
-      const hash = require("crypto")
-        .createHash("md5")
-        .update(JSON.stringify(styleObj))
-        .digest("hex");
-      suffix = hash.slice(0, 7);
-    }
     const className = `${selector}-${suffix}`;
 
     classes[selector] = className;
