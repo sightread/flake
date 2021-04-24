@@ -18,6 +18,7 @@ type StringMap = {
 
 let counter = 0;
 let globalStyle = "";
+let globalClasses: any = {};
 
 // TODO: create babel plugin that processes all of the CSS into a single bundle
 // and removes all css() calls from the source in favor of inlining classname map
@@ -45,6 +46,10 @@ function css(styleObject: StyleObject): StringMap {
   const parsed = compileCss(styleObject);
   if (!isBrowser()) {
     globalStyle += parsed.styleHtml;
+    Object.assign(globalClasses, parsed.classes);
+    // TODO: support filename
+    // globalClasses[__filename] ??= [];
+    // globalClasses[__filename].push(parsed.classes);
   } else {
     getStyleEl().innerHTML += parsed.styleHtml;
   }
@@ -52,8 +57,8 @@ function css(styleObject: StyleObject): StringMap {
   return parsed.classes;
 }
 
-function extractCss(): string {
-  return globalStyle;
+function getGlobalStyles(): { classes: StringMap; styleHtml: string } {
+  return { styleHtml: globalStyle, classes: globalClasses };
 }
 
 function compileCss(
@@ -64,9 +69,15 @@ function compileCss(
 
   Object.keys(styleObj).forEach((selector) => {
     const styles = styleObj[selector];
-    const suffix = counter++;
+    let suffix: number | string = counter++;
+    if (!isBrowser()) {
+      const hash = require("crypto")
+        .createHash("md5")
+        .update(JSON.stringify(styleObj))
+        .digest("hex");
+      suffix = hash.slice(0, 7);
+    }
     const className = `${selector}-${suffix}`;
-    counter++;
 
     classes[selector] = className;
     styleHtml += getNestedSelectors(styles, className);
@@ -190,4 +201,11 @@ function classNames(...args: ObjStringable[]): string {
   return args.map(objstr).join(" ");
 }
 
-export { css, extractCss, compileCss, FLAKE_STYLE_ID, classNames, mediaQuery };
+export {
+  css,
+  getGlobalStyles,
+  compileCss,
+  FLAKE_STYLE_ID,
+  classNames,
+  mediaQuery,
+};

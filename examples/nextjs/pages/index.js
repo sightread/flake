@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { css, mediaQuery } from "@sightread/flake";
+import { css, mediaQuery as m } from "@sightread/flake";
 
 const classes = css({
   container: {
@@ -73,7 +73,7 @@ const classes = css({
     flexWrap: "wrap",
     maxWidth: 800,
     marginTop: "3rem",
-    [mediaQuery.down(600)]: {
+    [m.down(600)]: {
       width: "100%",
       flexDirection: "column"
     }

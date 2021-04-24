@@ -1,23 +1,21 @@
 # Flakecss
 
-A minimalist css in javascript renderer. Our mission
-is to be as small as possible while supporting all of the important use cases.
+A zero cost css-in-js solution that compiles itself away.
 
 ## Features
 
-- media queries
-- pseudo-classes/pseudo-selectors
-- your favorite css properties
-- SSR
-- no dependencies
-- written in typescript
+- no dependencies, and weighs less than **800B**.
+- flexible component styling
+- classic css-in-js behavior during development, compile to a plain css file for production.
+- Supports advanced CSS features like:
+  - media queries
+  - pseudo-classes/pseudo-selectors
+  - your favorite css properties
 
 ## Installation
 
 ```shell
-$ npm i @sightread/flake
-or
-$ yarn add @sightread/flake
+$ npm install @sightread/flake
 ```
 
 ## Usage
@@ -85,13 +83,8 @@ const classes = css({
       color: "blue",
       "&:hover": {
         color: "black",
-        textDecoration: "underline"
-      },
-      "&:focus": {
-        color: "black"
       }
     }
-
   },
 })
 ```
